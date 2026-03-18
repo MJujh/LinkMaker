@@ -1,4 +1,4 @@
-﻿@model LinkMaker.Data.Entities.User
+﻿@model LinkMaker.Common.DTOs.UserDTO
 
 @{
     ViewData["Title"] = "Edit";
@@ -12,43 +12,56 @@
     <div class="col-md-4">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            @* The ID must be here so the Service knows which user to update *@
             <input type="hidden" asp-for="Id" />
+
             <div class="form-group">
                 <label asp-for="FullName" class="control-label"></label>
                 <input asp-for="FullName" class="form-control" />
                 <span asp-validation-for="FullName" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="DateOfBirth" class="control-label"></label>
                 <input asp-for="DateOfBirth" class="form-control" />
                 <span asp-validation-for="DateOfBirth" class="text-danger"></span>
             </div>
+
+            @* IMPORTANT: Check your UserDTO property name. 
+               If it is called 'AvatarPath', change 'Avatar' to 'AvatarPath' below.
+            *@
             <div class="form-group">
-                <label asp-for="Avatar" class="control-label"></label>
-                <input asp-for="Avatar" class="form-control" />
-                <span asp-validation-for="Avatar" class="text-danger"></span>
+                <label asp-for="AvatarPath" class="control-label"></label>
+                <input asp-for="AvatarPath" class="form-control" />
+                <span asp-validation-for="AvatarPath" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="Phone" class="control-label"></label>
                 <input asp-for="Phone" class="form-control" />
                 <span asp-validation-for="Phone" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="Email" class="control-label"></label>
                 <input asp-for="Email" class="form-control" />
                 <span asp-validation-for="Email" class="text-danger"></span>
             </div>
+
             <div class="form-group">
                 <label asp-for="Address" class="control-label"></label>
                 <input asp-for="Address" class="form-control" />
                 <span asp-validation-for="Address" class="text-danger"></span>
             </div>
+
             <div class="form-group">
-                <label asp-for="UrlId" class="control-label"></label>
+                <label asp-for="UrlId" class="control-label">Link</label>
                 <select asp-for="UrlId" class="form-control" asp-items="ViewBag.UrlId"></select>
                 <span asp-validation-for="UrlId" class="text-danger"></span>
             </div>
-            <div class="form-group">
+
+            <div class="form-group mt-3">
                 <input type="submit" value="Save" class="btn btn-primary" />
             </div>
         </form>
@@ -60,5 +73,7 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

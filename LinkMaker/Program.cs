@@ -1,8 +1,10 @@
+using LinkMaker.Common.Contants;
 using LinkMaker.Data;
 using LinkMaker.Data.Interfaces;
 using LinkMaker.Services.Implementations;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +17,25 @@ builder.Services.AddDbContext<LinkMakerDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddDbContext<LinkMakerIdentityDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("LinkMakerIdentityDbContextConnection")));
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy(Configs.IPPolicyLimiter, httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress!.ToString(),
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 3,
+                Window = TimeSpan.FromSeconds(1)
+            }));
+});
+
+// Đăng ký Redis Distributed Cache
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = "localhost:6379"; // hoặc connection string của Redis server
+    options.InstanceName = "linkmakerredis";
+});
 
 builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 {
@@ -39,7 +60,7 @@ builder.Services.AddDefaultIdentity<IdentityUser>(options =>
 .AddEntityFrameworkStores<LinkMakerIdentityDbContext>()
 .AddDefaultTokenProviders();
 
-builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<LinkMakerIdentityDbContext>();
+//builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<LinkMakerIdentityDbContext>();
 
 var app = builder.Build();
 
